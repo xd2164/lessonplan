@@ -1,0 +1,1 @@
+"""Narcissus - A self-reflective essay writing system""" 
