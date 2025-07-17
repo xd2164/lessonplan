@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lesson Plan Generator</title>
+  <style>
+    body { font-family: Arial; margin: 2em; background-color: #f5f5f5; }
+    .container { max-width: 800px; margin: 0 auto; background: white; padding: 2em; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+    h1 { color: #2c3e50; text-align: center; }
+    .form-group { margin-bottom: 1em; }
+    label { display: block; margin-bottom: 0.5em; font-weight: bold; color: #34495e; }
+    input, textarea, select { width: 100%; padding: 0.5em; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+    textarea { height: 100px; resize: vertical; }
+    button { background-color: #3498db; color: white; padding: 0.8em 1.5em; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background-color: #2980b9; }
+    button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+    #result { margin-top: 2em; padding: 1em; border: 1px solid #ddd; border-radius: 4px; background-color: #f9f9f9; white-space: pre-wrap; }
+    .loading { text-align: center; color: #7f8c8d; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Lesson Plan Generator</h1>
+    
+    <form id="lessonForm">
+      <div class="form-group">
+        <label for="topic">Lesson Topic:</label>
+        <input type="text" id="topic" placeholder="e.g., Photosynthesis, Fractions, Shakespeare" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="grade">Grade Level:</label>
+        <select id="grade" required>
+          <option value="">Select Grade Level</option>
+          <option value="Kindergarten">Kindergarten</option>
+          <option value="1st Grade">1st Grade</option>
+          <option value="2nd Grade">2nd Grade</option>
+          <option value="3rd Grade">3rd Grade</option>
+          <option value="4th Grade">4th Grade</option>
+          <option value="5th Grade">5th Grade</option>
+          <option value="6th Grade">6th Grade</option>
+          <option value="7th Grade">7th Grade</option>
+          <option value="8th Grade">8th Grade</option>
+          <option value="High School">High School</option>
+          <option value="College">College</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="subject">Subject:</label>
+        <select id="subject" required>
+          <option value="">Select Subject</option>
+          <option value="Science">Science</option>
+          <option value="Math">Math</option>
+          <option value="English">English</option>
+          <option value="History">History</option>
+          <option value="Geography">Geography</option>
+          <option value="Art">Art</option>
+          <option value="Music">Music</option>
+          <option value="Physical Education">Physical Education</option>
+          <option value="Social Studies">Social Studies</option>
+          <option value="Computer Science">Computer Science</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="duration">Duration:</label>
+        <input type="text" id="duration" placeholder="e.g., 45 minutes, 1 hour, 90 minutes" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="objectives">Learning Objectives:</label>
+        <textarea id="objectives" placeholder="Enter learning objectives, one per line. For example:&#10;Students will explain the process of photosynthesis&#10;Students will identify key components&#10;Students will describe how plants convert sunlight into energy" required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="drafts">Number of Drafts:</label>
+        <select id="drafts">
+          <option value="1">1 Draft</option>
+          <option value="2" selected>2 Drafts</option>
+          <option value="3">3 Drafts</option>
+        </select>
+      </div>
+      
+      <button type="submit" id="generateBtn">Generate Lesson Plan</button>
+    </form>
+    
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById('lessonForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const generateBtn = document.getElementById('generateBtn');
+      const resultDiv = document.getElementById('result');
+      
+      // Get form data
+      const formData = {
+        topic: document.getElementById('topic').value,
+        grade_level: document.getElementById('grade').value,
+        subject: document.getElementById('subject').value,
+        duration: document.getElementById('duration').value,
+        learning_objectives: document.getElementById('objectives').value,
+        num_drafts: parseInt(document.getElementById('drafts').value)
+      };
+      
+      // Show loading
+      generateBtn.disabled = true;
+      generateBtn.textContent = 'Generating...';
+      resultDiv.innerHTML = '<div class="loading">Narcissus is creating your lesson plan... This may take a few minutes.</div>';
+      
+      try {
+        const response = await fetch('http://localhost:8000/generate-lesson-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          resultDiv.innerHTML = `<h3>Your Lesson Plan is Ready!</h3><div>${data.result}</div>`;
+        } else {
+          resultDiv.innerHTML = `<h3>Error</h3><div>${data.detail || 'Something went wrong'}</div>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<h3>Error</h3><div>Failed to connect to the server. Make sure your backend is running.</div>`;
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = 'Generate Lesson Plan';
+      }
+    });
+  </script>
+</body>
+</html>
